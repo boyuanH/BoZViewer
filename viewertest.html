@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Heatmap for BoZ</title>
+
+</head>
+<body>
+    <div id="fullurl"></div>
+    <div id="passpara"></div>
+    <div id="content"></div>
+    <img src="image/Last1.png"/>
+    <!--<img src="./data/20170627091244S_Results/Recognition/000003.png"/> >-->
+    <script>
+
+//        var fso=new ActiveXObject("Scripting.FileSystemObject");
+//        var f1=fso.OpenTextFile("./data/20170627091244S_Results/heatmap_1_1200_new_sample.csv",1);
+        //ajaxGetHTML("/data/2017/1.csv");
+
+
+        function displayimageitem(name,isred,time,coordinates){
+            var imgitem = new Object;
+            imgitem.filename = name;
+            imgitem.isRed = isred;
+            imgitem.time = time;
+            imgitem.coordinates = coordinates;
+            return imgitem;
+        }
+
+        function coordinate(longitude,latitude) {
+            var coor = new Object;
+            coor.longitude = longitude;
+            coor.latitude = latitude;
+            return coor;
+        }
+
+        var itemlist =  [];
+
+        var item1 = displayimageitem("23",false,new Date("2016/12/21 09:42:49.077"),null);
+        itemlist.push(item1);
+
+        var coor = [333.3,444.4];
+        var item2 = displayimageitem("232",false,new Date("2016/12/21 09:42:49.42"),coor);
+        itemlist.push(item2);
+
+
+
+        var xmldata;
+        getData("/data/2017/1.csv");
+//        document.getElementById("content").innerHTML = xmldata;
+
+        function getData(url) {
+            var xmlhttp;
+            try{
+                xmlhttp=new ActiveXObject("Msxml2.XMLHTTP");
+            }catch(e){
+                try{
+                    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+                }catch(e){	}
+            }
+            if(!xmlhttp) {
+                xmlhttp=new XMLHttpRequest();
+            }else {
+                return "";
+            }
+            var responseText =""
+            xmlhttp.onreadystatechange = function () {
+                if(xmlhttp.readyState == 4){
+                    responseText = xmlhttp.responseText;
+                    responseText=responseText.replace(/</g,"&lt;");
+                    responseText=responseText.replace(/>/g,"&gt;");
+                    document.getElementById("content").innerHTML = responseText;
+                    xmlhttp = null;
+                }
+
+            }
+            xmlhttp.open("GET",url,true);
+            xmlhttp.send(null);
+
+        }
+
+        function ajaxGetHTML(webURL){
+            var url=webURL;
+            if(url=="") url=document.getElementById("xurl").value;
+            var xmlhttp;
+            try{
+                xmlhttp=new ActiveXObject("Msxml2.XMLHTTP");
+            }catch(e){
+                try{
+                    xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+                }catch(e){	}
+            }
+
+            if(!xmlhttp) xmlhttp=new XMLHttpRequest();
+            xmlhttp.onreadystatechange =function(){
+                if (xmlhttp.readyState==4){
+                    var s=xmlhttp.responseText;
+                    //s=s.replace(/</g,"&lt;");
+                    //s=s.replace(/>/g,"&gt;");
+                    datamodify(s);
+                    xmlhttp=null;
+                }
+            }
+            xmlhttp.open("GET",url,true);
+            xmlhttp.send(null);
+        }
+
+        function datamodify(datacontent) {
+            var l = datacontent.split('\n');
+            for(var i = 0;i<l.length;i++){
+                var d = l[i].split(',');
+                var tmpx = d[0];
+                var tmpy = d[1];
+                document.getElementById("content").innerHTML = tmpx + "    "+tmpy;
+            }
+        }
+
+//        var locstring = String(window.document.location.href);
+//        var fullurl = document.getElementById('fullurl');
+//        fullurl.innerHTML=locstring
+//        var divpass = document.getElementById('passpara');
+//        divpass.innerHTML="the file selected is "+ GetQueryString(locstring,'name');
+
+        function GetQueryString(str,id) {
+            var URLParams = new Array();
+            var params = document.location.search.substr(1).split('&');
+            for (i=0; i < params.length ; i++){
+                var aParam = params[i].split('=');
+                URLParams[aParam[0]] = aParam[1];
+            }
+            return URLParams[id];
+        }
+    </script>
+</body>
+</html>
