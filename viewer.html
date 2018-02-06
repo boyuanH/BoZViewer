@@ -230,7 +230,8 @@
             text-align: center;
         }
     </style>
-    <div id="map" class="map" onclick="MapClicked()"></div>
+    <!--<div id="map" class="map" onclick="MapClicked()"></div>-->
+    <div id="map" class="map" ></div>
     <div id="mapselectbox">
         <ul id="mapswitcher" style="list-style-type:none">
             <li><label><input type="radio" name="layer1" value="0" > �n���@�i�W���n�}�j</label></li>
@@ -790,10 +791,39 @@
             coor.latitude = latitude;
             return coor;
         }
+
         var playIntervalid;
 
+        map.addEventListener("click",function(e){
+            var x = e.map.U;
+            var TargetCoor = ol.proj.transform(x,"EPSG:900913", "EPSG:4326");
+            var htmlStr = trimSpaces(T$('ScrollAndJumpSelector').innerHTML);
+            var para = DisplayImageList.length;
+            if((htmlStr == "JUMP")){
+                if(para >= 0){
+                    currentImageIndex = 50;
+                    clearInterval(playIntervalid);
+                    redLineCount = 0;
+                    for(var rednum =0;rednum<DisplayImageList.length;rednum++){
+                        if(DisplayImageList[rednum].coordinates.length>0){
+                            DisplayImageList[rednum].isRed = true;
+                            redLineCount++;
+                        }
+                    }
+                    clearInterval(imgLoadCheckTimer);
+                    var content2 = "<div><div align='center' height='520'><img id='popupImg' width='640' height='480' SlideAndFadeOutSlideAndFadeOutSlideAndFadeOut src='"+imageDirectory+ConvertImageIndexToFrame(DisplayImageList[currentImageIndex].filename)+".png' onerror='errorinput(this);' /></div><div id='redlineslider' class='sliderDiV'></div><div><table><tr><td width='75'><input type='image' id='last1'  width = '49' src='image/Last1.png' onclick='playforward()'/></td><td width='75'><img id='last2' width = '49' src='image/Last2.png' onclick='lastredline()'/></td><td width='75'><img id='popupLastImg' width = '49' src='image/Last3.png' onclick='lastimage()'/></td><td width='75'><h4 id='imageTime'>"+getdisplaytime(DisplayImageList[currentImageIndex])+"</h4></td><td width='75'><img id='popupNextImg' width = '49' src='image/Next3.png' onclick='nextimage()'/></td><td width='75'><img id='next2' width = '49' src='image/Next2.png' onclick='nextredline()'/></td><td width='75'><input type='image' id='next1' width = '49' src='image/Next1.png'  onclick='playback()'/></td><td width='75'><button id='Show RedLine' width = '50' onclick='showRedLine()'>Close</button></td></tr></table></div></div>";
+                    TINY.box.show(content2,0,0,0,1);
+                    imgLoadCheck();
+                }else{
+                    alert("No para");
+                }
+            }
+        ;});
+
         function MapClicked(){
-            
+
+            var pixel = new ol.Pixel(e.xy.x,e.xy.y);
+            var lonlat = map.getLonLatFromPixel(pixel);
             //Get Coordinate
             var htmlStr = trimSpaces(T$('ScrollAndJumpSelector').innerHTML);
             var para = DisplayImageList.length;
@@ -801,22 +831,6 @@
                 if(para >= 0){
                 currentImageIndex = 50;
                 clearInterval(playIntervalid);
-                /*DisplayImageList.splice(0,DisplayImageList.length);
-                var test1obj = displayimageitem("0",true,new Date("2016/12/21 09:42:49.077"));
-                var test2obj = displayimageitem("1",false,new Date("2016/12/21 09:42:49.201"));
-                var test3obj = displayimageitem("2",true,new Date("2016/12/21 09:42:49.303"));
-                var test4obj = displayimageitem("3",false,new Date("2016/12/21 09:42:49.404"));
-                var test5obj = displayimageitem("4",true,new Date("2016/12/21 09:42:49.505"));
-                var test6obj = displayimageitem("5",true,new Date("2016/12/21 09:42:49.596"));
-                var test7obj = displayimageitem("6",false,new Date("2016/12/21 09:42:49.697"));
-                DisplayImageList[0] = test1obj;
-                DisplayImageList[1] = test2obj;
-                DisplayImageList[2] = test3obj;
-                DisplayImageList[3] = test4obj;
-                DisplayImageList[4] = test5obj;
-                DisplayImageList[5] = test6obj;
-                DisplayImageList[6] = test7obj;
-                */
                 redLineCount = 0;
                 for(var rednum =0;rednum<DisplayImageList.length;rednum++){
                     if(DisplayImageList[rednum].coordinates.length>0){
@@ -825,14 +839,12 @@
                     }
                 }
                 clearInterval(imgLoadCheckTimer);
-
                 var content2 = "<div><div align='center' height='520'><img id='popupImg' width='640' height='480' SlideAndFadeOutSlideAndFadeOutSlideAndFadeOut src='"+imageDirectory+ConvertImageIndexToFrame(DisplayImageList[currentImageIndex].filename)+".png' onerror='errorinput(this);' /></div><div id='redlineslider' class='sliderDiV'></div><div><table><tr><td width='75'><input type='image' id='last1'  width = '49' src='image/Last1.png' onclick='playforward()'/></td><td width='75'><img id='last2' width = '49' src='image/Last2.png' onclick='lastredline()'/></td><td width='75'><img id='popupLastImg' width = '49' src='image/Last3.png' onclick='lastimage()'/></td><td width='75'><h4 id='imageTime'>"+getdisplaytime(DisplayImageList[currentImageIndex])+"</h4></td><td width='75'><img id='popupNextImg' width = '49' src='image/Next3.png' onclick='nextimage()'/></td><td width='75'><img id='next2' width = '49' src='image/Next2.png' onclick='nextredline()'/></td><td width='75'><input type='image' id='next1' width = '49' src='image/Next1.png'  onclick='playback()'/></td><td width='75'><button id='Show RedLine' width = '50' onclick='showRedLine()'>Close</button></td></tr></table></div></div>";
                 TINY.box.show(content2,0,0,0,1);
                 imgLoadCheck();
                 }else{
                     alert("No para");
                 }
-
             }
         }
         
@@ -1281,6 +1293,7 @@
         function mapMove(lon, lat, rotation, zoom) {
             //�e�퍀�ڂ̃��Z�b�g
             view.setCenter(ol.proj.transform([lon, lat], "EPSG:4326", "EPSG:3857"));
+            var coord = ol.proj.transform([lon, lat], "EPSG:4326", "EPSG:3857");
             view.setRotation(rotation);
             view.setZoom(zoom);
         }
