@@ -641,12 +641,7 @@
                 if(!isNull(strItem)){
                     var d=l[i].split(',');
                     var coordinates = [];
-
                     var isred = false;
-//                    if(i % 17 ==0){
-//                        isred = true;
-//                        redLineCount++;
-//                    }
                     var imageitemobj = displayimageitem(d[0],isred,new Date(d[1],d[2],d[3],d[4],d[5],d[6],d[7]),coordinates);
                     DisplayImageList.push(imageitemobj);
                 }
@@ -795,23 +790,40 @@
         var playIntervalid;
 
         map.addEventListener("click",function(e){
-            var x = e.map.U;
-            var TargetCoor = ol.proj.transform(x,"EPSG:900913", "EPSG:4326");
+            var x = parseFloat(e.map.U[0]);
+            var y = parseFloat(e.map.U[1]);
+            //var TargetCoor = ol.proj.transform(e.map.U,"EPSG:900913", "EPSG:4326");
             var htmlStr = trimSpaces(T$('ScrollAndJumpSelector').innerHTML);
             var para = DisplayImageList.length;
             if((htmlStr == "JUMP")){
                 if(para >= 0){
-                    currentImageIndex = 50;
+                    currentImageIndex = 0;
                     clearInterval(playIntervalid);
+                    var radiusvalue = parseFloat(radius.value) ;
                     redLineCount = 0;
                     for(var rednum =0;rednum<DisplayImageList.length;rednum++){
+                        DisplayImageList[rednum].isRed = false;
                         if(DisplayImageList[rednum].coordinates.length>0){
-                            DisplayImageList[rednum].isRed = true;
-                            redLineCount++;
+                            for(var coordinateindex = 0;coordinateindex<DisplayImageList[rednum].coordinates.length;coordinateindex++){
+//                                var x1 = parseFloat(currentcoordinate["longitude"])-parseFloat(TargetCoor[0]);
+//                                var x2 = Math.sqrt(Math.pow(x1,2));
+//                                var y1 = parseFloat(currentcoordinate["latitude"])-parseFloat(TargetCoor[1]);
+//                                var y2 = Math.pow(y1,2);
+//                                var distance = Math.sqrt(x2 + y2);
+                                var currentcoordinate = DisplayImageList[rednum].coordinates[coordinateindex];
+                                var coord = convertCoordinate(currentcoordinate["longitude"],currentcoordinate["latitude"]);
+                                var distance = DistanceOfPoints(x,coord[0],y,coord[1]);
+                                if(distance < radiusvalue){
+                                    DisplayImageList[rednum].isRed = true;
+                                    redLineCount++;
+                                    break;
+                                }
+                            }
                         }
                     }
+
                     clearInterval(imgLoadCheckTimer);
-                    var content2 = "<div><div align='center' height='520'><img id='popupImg' width='640' height='480' SlideAndFadeOutSlideAndFadeOutSlideAndFadeOut src='"+imageDirectory+ConvertImageIndexToFrame(DisplayImageList[currentImageIndex].filename)+".png' onerror='errorinput(this);' /></div><div id='redlineslider' class='sliderDiV'></div><div><table><tr><td width='75'><input type='image' id='last1'  width = '49' src='image/Last1.png' onclick='playforward()'/></td><td width='75'><img id='last2' width = '49' src='image/Last2.png' onclick='lastredline()'/></td><td width='75'><img id='popupLastImg' width = '49' src='image/Last3.png' onclick='lastimage()'/></td><td width='75'><h4 id='imageTime'>"+getdisplaytime(DisplayImageList[currentImageIndex])+"</h4></td><td width='75'><img id='popupNextImg' width = '49' src='image/Next3.png' onclick='nextimage()'/></td><td width='75'><img id='next2' width = '49' src='image/Next2.png' onclick='nextredline()'/></td><td width='75'><input type='image' id='next1' width = '49' src='image/Next1.png'  onclick='playback()'/></td><td width='75'><button id='Show RedLine' width = '50' onclick='showRedLine()'>Close</button></td></tr></table></div></div>";
+                    var content2 = "<div><div align='center' height='520'><img id='popupImg' width='640' height='480' SlideAndFadeOutSlideAndFadeOutSlideAndFadeOut src='"+imageDirectory+ConvertImageIndexToFrame(DisplayImageList[currentImageIndex].filename)+".png' onerror='errorinput(this);' /></div><div id='redlineslider' class='sliderDiV'></div><div><table><tr><td width='75'><input type='image' id='last1'  width = '49' src='image/Last1.png' onclick='playforward()'/></td><td width='75'><img id='last2' width = '49' src='image/Last2.png' onclick='lastredline()'/></td><td width='75'><img id='popupLastImg' width = '49' src='image/Last3.png' onclick='lastimage()'/></td><td width='75'><h4 id='imageTime'>"+getdisplaytime(DisplayImageList[currentImageIndex])+"</h4></td><td width='75'><img id='popupNextImg' width = '49' src='image/Next3.png' onclick='nextimage()'/></td><td width='75'><img id='next2' width = '49' src='image/Next2.png' onclick='nextredline()'/></td><td width='75'><input type='image' id='next1' width = '49' src='image/Next1.png'  onclick='playback()'/></td><td width='75'><button id='CloseButton' width = '50' onclick='closepopupimage()'>Close</button></td></tr></table></div></div>";
                     TINY.box.show(content2,0,0,0,1);
                     imgLoadCheck();
                 }else{
@@ -819,6 +831,10 @@
                 }
             }
         ;});
+
+        function DistanceOfPoints(x1,x2,y1,y2) {
+            return Math.sqrt(Math.pow((parseFloat(x1)-parseFloat(x2)),2)+Math.pow((parseFloat(y1)-parseFloat(y2)),2))
+        }
 
         function MapClicked(){
 
@@ -829,7 +845,7 @@
             var para = DisplayImageList.length;
             if((htmlStr == "JUMP")){
                 if(para >= 0){
-                currentImageIndex = 50;
+                currentImageIndex = 0;
                 clearInterval(playIntervalid);
                 redLineCount = 0;
                 for(var rednum =0;rednum<DisplayImageList.length;rednum++){
@@ -861,77 +877,59 @@
             imgLoadCheckTimer = setInterval(function() {
                 var popupImageItem = T$('redlineslider');
                 if(popupImageItem != null){
-                    console.log("Image Get");
+                    //console.log("Image Get");
                     if (popupImageItem.offsetWidth >0) {
                         clearInterval(imgLoadCheckTimer);
                         showRedLine();
                     }
                 }
-                else{
-                    console.log("No Image");
-                }
+//                else{
+//                    console.log("No Image");
+//                }
             }, 500)
         }
         function showRedLine(){
-
-            return;
             if(DisplayImageList.length > 0){
-
                 var sliderSupportDiv = T$('slidersupport');
                 if(sliderSupportDiv){
                     sliderSupportDiv.parentNode.removeChild(sliderSupportDiv);
                 }
-
                 sliderSupportDiv = document.createElement('div');
                 sliderSupportDiv.className = 'supportDiv';
                 sliderSupportDiv.id = 'slidersupport';
-
                 var sliderdiv = T$('redlineslider');
                 sliderdiv.appendChild(sliderSupportDiv);
 
-
-
-                //var lineWidth = parseInt((sliderdiv.offsetWidth)/DisplayImageList.length);
-                var lineWidth = parseInt((sliderdiv.offsetWidth)/redLineCount);
+                var lineWidth = parseInt((sliderdiv.offsetWidth)/DisplayImageList.length);
+                //var lineWidth = parseInt((sliderdiv.offsetWidth)/redLineCount);
                 if(lineWidth < 1){
                     lineWidth = 1;
                 }	
-                
+                console.log("line width is "+lineWidth);
+                console.log("Red line number is " + redLineCount);
                 var lastlocation = 0;
-                
                 for(var lineindex = 0;lineindex<DisplayImageList.length;lineindex++){
-                
                     if(DisplayImageList[lineindex].isRed == true){
                         var p=document.createElement('div');
                         p.id='linediv_'+lineindex;
                         sliderSupportDiv.appendChild(p);
-                        var currentlocation = parseInt(((lineindex/DisplayImageList.length)*sliderdiv.offsetWidth)/2);
+                        var currentlocation = parseInt(((lineindex/DisplayImageList.length)*sliderdiv.offsetWidth));
                         p.style.marginLeft = (currentlocation - lastlocation)+"px";
                         lastlocation = currentlocation + lineWidth;
                         p.style.width = lineWidth+"px";
                         p.style.height = sliderdiv.offsetHeight;
                         p.style.background = "#FF0000";
                         p.style.float = "left";
-                        //p.addEventListener("click",divClick,false);
-
                     }
                 }					
             }
         }
-/*        
-        function divClick(){
-            var divId = this.id+"";
-            var idList = divId.split("_");
-            var imageindex = parseInt(idList[idList.length-1]);
-            displayimageonpopupimg(imageindex);
-        }        
-*/        
+
         function ConvertImageIndexToFrame(imageIndex){
             var index = parseInt(imageIndex);
             if(index<0){
                 return "";
             }
-
             if(index < 10){
                 return "00000"+index;
             }else if(index < 100){
@@ -1059,12 +1057,27 @@
             imageTime.innerText = getdisplaytime(DisplayImageList[currentImageIndex]);
         }
         
-
+        function closepopupimage() {
+            TINY.box.hide();
+            CleanAllTimeInterval();
+            console.log("Popup Closed");
+        }
 
 
         function getdisplaytime(imageitem){
-            var timestring = imageitem.time.getHours()+":"+imageitem.time.getMinutes()+":"+imageitem.time.getSeconds()+"."+imageitem.time.getMilliseconds();
-            return timestring;
+            var tmpMillSe = parseInt(imageitem.time.getMilliseconds());
+            var tmpStr = "000 ";
+            if(isNaN(tmpMillSe) == false){
+                if(tmpMillSe<10){
+                    tmpStr="00"+tmpMillSe+" ";
+                }else if(tmpMillSe<100 ){
+                    tmpStr = "0" + tmpMillSe +" ";
+                }else {
+                    tmpStr = tmpMillSe + "";
+                }
+            }
+            var timestring = imageitem.time.getHours()+":"+imageitem.time.getMinutes()+":"+imageitem.time.getSeconds()+".";
+            return timestring+tmpStr;
         }
 
         function displayimageonpopupimg(imgindex){
