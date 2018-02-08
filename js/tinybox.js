@@ -10,15 +10,12 @@ TINY.box=function(){
 				p=document.createElement('div'); p.id='tinybox';
 				m=document.createElement('div'); m.id='tinymask';
 				b=document.createElement('div'); b.id='tinycontent';
-
 				document.body.appendChild(m); document.body.appendChild(p); p.appendChild(b);
 				m.onclick = function () {
                     TINY.box.hide();
                     CleanAllTimeInterval();
                 }
-                //m.onclick=TINY.box.hide;
 				window.onresize=TINY.box.resize; f=1;//window.onload=showRedLine();
-				//b.onresize = showRedLine();
 			}
 			if(!a&&!u){
 				p.style.width=w?w+'px':'auto'; p.style.height=h?h+'px':'auto';
