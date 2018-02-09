@@ -805,11 +805,6 @@
                         DisplayImageList[rednum].isRed = false;
                         if(DisplayImageList[rednum].coordinates.length>0){
                             for(var coordinateindex = 0;coordinateindex<DisplayImageList[rednum].coordinates.length;coordinateindex++){
-//                                var x1 = parseFloat(currentcoordinate["longitude"])-parseFloat(TargetCoor[0]);
-//                                var x2 = Math.sqrt(Math.pow(x1,2));
-//                                var y1 = parseFloat(currentcoordinate["latitude"])-parseFloat(TargetCoor[1]);
-//                                var y2 = Math.pow(y1,2);
-//                                var distance = Math.sqrt(x2 + y2);
                                 var currentcoordinate = DisplayImageList[rednum].coordinates[coordinateindex];
                                 var coord = convertCoordinate(currentcoordinate["longitude"],currentcoordinate["latitude"]);
                                 var distance = DistanceOfPoints(x,coord[0],y,coord[1]);
@@ -836,34 +831,6 @@
             return Math.sqrt(Math.pow((parseFloat(x1)-parseFloat(x2)),2)+Math.pow((parseFloat(y1)-parseFloat(y2)),2))
         }
 
-        function MapClicked(){
-
-            var pixel = new ol.Pixel(e.xy.x,e.xy.y);
-            var lonlat = map.getLonLatFromPixel(pixel);
-            //Get Coordinate
-            var htmlStr = trimSpaces(T$('ScrollAndJumpSelector').innerHTML);
-            var para = DisplayImageList.length;
-            if((htmlStr == "JUMP")){
-                if(para >= 0){
-                currentImageIndex = 0;
-                clearInterval(playIntervalid);
-                redLineCount = 0;
-                for(var rednum =0;rednum<DisplayImageList.length;rednum++){
-                    if(DisplayImageList[rednum].coordinates.length>0){
-                        DisplayImageList[rednum].isRed = true;
-                        redLineCount++;
-                    }
-                }
-                clearInterval(imgLoadCheckTimer);
-                var content2 = "<div><div align='center' height='520'><img id='popupImg' width='640' height='480' SlideAndFadeOutSlideAndFadeOutSlideAndFadeOut src='"+imageDirectory+ConvertImageIndexToFrame(DisplayImageList[currentImageIndex].filename)+".png' onerror='errorinput(this);' /></div><div id='redlineslider' class='sliderDiV'></div><div><table><tr><td width='75'><input type='image' id='last1'  width = '49' src='image/Last1.png' onclick='playforward()'/></td><td width='75'><img id='last2' width = '49' src='image/Last2.png' onclick='lastredline()'/></td><td width='75'><img id='popupLastImg' width = '49' src='image/Last3.png' onclick='lastimage()'/></td><td width='75'><h4 id='imageTime'>"+getdisplaytime(DisplayImageList[currentImageIndex])+"</h4></td><td width='75'><img id='popupNextImg' width = '49' src='image/Next3.png' onclick='nextimage()'/></td><td width='75'><img id='next2' width = '49' src='image/Next2.png' onclick='nextredline()'/></td><td width='75'><input type='image' id='next1' width = '49' src='image/Next1.png'  onclick='playback()'/></td><td width='75'><button id='Show RedLine' width = '50' onclick='showRedLine()'>Close</button></td></tr></table></div></div>";
-                TINY.box.show(content2,0,0,0,1);
-                imgLoadCheck();
-                }else{
-                    alert("No para");
-                }
-            }
-        }
-        
         function CleanAllTimeInterval() {
             clearInterval(imgLoadCheckTimer);
             clearInterval(playIntervalid);
@@ -883,9 +850,6 @@
                         showRedLine();
                     }
                 }
-//                else{
-//                    console.log("No Image");
-//                }
             }, 500)
         }
         function showRedLine(){
@@ -901,7 +865,6 @@
                 sliderdiv.appendChild(sliderSupportDiv);
 
                 var lineWidth = parseInt((sliderdiv.offsetWidth)/DisplayImageList.length);
-                //var lineWidth = parseInt((sliderdiv.offsetWidth)/redLineCount);
                 if(lineWidth < 1){
                     lineWidth = 1;
                 }	

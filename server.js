@@ -3,8 +3,6 @@ var url = require('url');
 var fs = require('fs');  
 var path = require('path');   
 var filePath = path.join(__dirname,'data');  
-var dirNames = [];
-
 
 http.createServer(function (request, response) {
 
@@ -12,10 +10,10 @@ http.createServer(function (request, response) {
     if(pathname == "/favicon.ico")
         return; 
     
-    //console.log(request.url);
     if(pathname == "/"){
         pathname = "index.html";
     }
+
     console.log("Request for " + pathname + " received.");
     
     fs.exists(path.join(__dirname,pathname),function(exists){
@@ -24,19 +22,13 @@ http.createServer(function (request, response) {
                 case ".html":
                 {
                     response.writeHead(200, {"Content-Type": "text/html"});
-                    console.log("html hit");
-                    switch(pathname){                    
+                    switch(pathname){
                         case "index.html":
-                                console.log("index hit");
                                 var files = fs.readdirSync(filePath);
                                 files.forEach(function(filename){
                                     var filedir = path.join(filePath,filename);
                                     var fsstat = fs.statSync(filedir);
                                     if(fsstat.isDirectory()){
-                                        //var str='"http://192.168.31.180/viewer.html?name='+filename+'"';
-                                        var str='"./viewertest.html?name='+filename+'"';
-                                        response.write('<a href='+str+'>'+filename+" test"+'</a>');
-                                        response.write('</br>');
                                         var str='"./viewer.html?name='+filename+'"';
                                         response.write('<a href='+str+'>'+filename+'</a>');
                                         response.write('</br>');
@@ -45,14 +37,12 @@ http.createServer(function (request, response) {
                                 response.end('');
                             break;
                         case "/viewertest.html":
-                                console.log("viewertest hit");
                                 fs.readFile(__dirname+url.parse(request.url).pathname,function (err,data){
                                     console.log(__dirname+url.parse(request.url).pathname);
                                     response.end(data);
                                 });
                             break;
                         case "/viewer.html":
-                                console.log("viewer hit");
                                 fs.readFile(__dirname+url.parse(request.url).pathname,function (err,data){
                                     console.log(__dirname+url.parse(request.url).pathname);
                                     response.end(data);
@@ -90,7 +80,6 @@ http.createServer(function (request, response) {
                 }
                 case ".png":
                 {
-                    console.log("png hit");
                     response.writeHead(200, {"Content-Type": "image/png"});
                     fs.readFile(__dirname+url.parse(request.url).pathname,function (err,data){
                         response.end(data);
@@ -99,7 +88,6 @@ http.createServer(function (request, response) {
                 }
                 case ".csv":
                 {
-                    console.log("csv hit");
                     response.writeHead(200,{"Content-Type": "text/plain"});
                     var filedata = fs.readFileSync(__dirname+url.parse(request.url).pathname,"utf-8");
                     response.write(filedata);
@@ -108,7 +96,6 @@ http.createServer(function (request, response) {
                 }
                 default:
                 {
-                    console.log("data hit");
                     response.writeHead(200, {"Content-Type": "application/octet-stream"});
                     fs.readFile(__dirname+url.parse(request.url).pathname,function (err,data){
                     response.end(data);
